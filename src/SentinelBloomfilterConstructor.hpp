@@ -180,8 +180,8 @@ main(int argc, char* argv[])
 	}
 
 	unsigned flags = 0;
-	if (with_id) {
-		flags |= btllib::Indexlr::Flag::ID;
+	if (!with_id) {
+		flags |= btllib::Indexlr::Flag::NO_ID;
 	}
 	if (with_bx) {
 		flags |= btllib::Indexlr::Flag::BX;
