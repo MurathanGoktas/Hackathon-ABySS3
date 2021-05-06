@@ -1,5 +1,6 @@
 #include "btllib/indexlr.hpp"
-#include "btllib/bloom_filter.hpp"
+//#include "btllib/bloom_filter.hpp"
+#include "btllib/counting_bloom_filter.hpp"
 
 #include <cassert>
 #include <condition_variable>
@@ -75,7 +76,8 @@ main(int argc, char* argv[])
 	bool w_set = false;
 	bool k_set = false;
 	int with_id = 0, with_bx = 0, with_pos = 0, with_strand = 0, with_seq = 0;
-	std::unique_ptr<btllib::KmerBloomFilter> repeat_bf, solid_bf;
+	//std::unique_ptr<btllib::KmerBloomFilter> repeat_bf, solid_bf;
+	std::unique_ptr<btllib::KmerCountingBloomFilter<uint16_t>> counting_bf;
 	bool with_repeat = false, with_solid = false;
 	int long_mode = 0;
 	std::string outfile("-");
@@ -110,7 +112,7 @@ main(int argc, char* argv[])
 		case 'v':
 			verbose = true;
 			break;
-		case 'r': {
+/* 		case 'r': {
 			with_repeat = true;
 			std::cerr << "Loading repeat Bloom filter from " << optarg << std::endl;
 			try {
@@ -133,11 +135,12 @@ main(int argc, char* argv[])
 			}
 			std::cerr << "Finished loading solid Bloom filter" << std::endl;
 			break;
-		}
+		} */
 		default:
 			std::exit(EXIT_FAILURE);
 		}
 	}
+	counting_bf = std::unique_ptr<btllib::KmerCountingBloomFilter<uint16_t>>(new btllib::KmerCountingBloomFilter<uint16_t>(optarg));
 	if (t > MAX_THREADS) {
 		t = MAX_THREADS;
 		std::cerr << (PROGNAME + ' ' + VERSION + ": Using more than " +
@@ -202,7 +205,15 @@ main(int argc, char* argv[])
 	}
 	for (auto& infile : infiles) {
 		std::unique_ptr<btllib::Indexlr> indexlr;
-		if (with_repeat && with_solid) {
+		indexlr = std::unique_ptr<btllib::Indexlr>(new btllib::Indexlr(
+			    infile,
+			    k,
+			    w,
+				counting_bf->get_counting_bloom_filter(),
+			    flags,
+			    t,
+			    verbose));
+/* 		if (with_repeat && with_solid) {
 			flags |= btllib::Indexlr::Flag::FILTER_IN;
 			flags |= btllib::Indexlr::Flag::FILTER_OUT;
 			indexlr = std::unique_ptr<btllib::Indexlr>(new btllib::Indexlr(
@@ -212,8 +223,7 @@ main(int argc, char* argv[])
 			    flags,
 			    t,
 			    verbose,
-			    solid_bf->get_bloom_filter(),
-			    repeat_bf->get_bloom_filter()));
+			    counting_bf->get_bloom_filter()));
 		} else if (with_repeat) {
 			flags |= btllib::Indexlr::Flag::FILTER_OUT;
 			indexlr = std::unique_ptr<btllib::Indexlr>(new btllib::Indexlr(
@@ -225,7 +235,7 @@ main(int argc, char* argv[])
 		} else {
 			indexlr = std::unique_ptr<btllib::Indexlr>(
 			    new btllib::Indexlr(infile, k, w, flags, t, verbose));
-		}
+		} */
 		std::queue<std::string> output_queue;
 		std::mutex output_queue_mutex;
 		std::condition_variable queue_empty, queue_full;
