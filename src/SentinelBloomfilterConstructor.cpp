@@ -38,11 +38,14 @@ print_usage()
 {
 	std::cerr
 	    << "Usage: " << PROGNAME
-	    << " -k K -w W [-r repeat_bf_path] [-s solid_bf_path] [--id] [--bx] [--pos] [--seq] "
+	    << " -k K -w W -r counting_bf_path [-a min_mx] [-b max_mx] [--id] [--bx] [--pos] [--seq] "
 	       "[-o FILE] FILE...\n\n"
 	       "  -k K        Use K as k-mer size.\n"
 	       "  -w W        Use W as sliding-window size.\n"
-	       "  --id        Include read ids in the output.\n"
+		   "  -a min_mx   Minimum multiplicity to be sentinel.\n"
+		   "  -b max_mx   Maximum multiplicity to be sentinel.\n"
+	       "  -r counting_bf_path  Use a Counting Bloom filter to filter out repetitive minimizers.\n"   
+		   "  --id        Include read ids in the output.\n"
 	       "  --bx        Include read barcodes in the output.\n"
 	       "  --pos       Include minimizer positions in the output (appended with : after "
 	       "minimizer value).\n"
@@ -54,8 +57,6 @@ print_usage()
 	       "they're appended in the --pos, --strand, --seq order after the minimizer value.\n"
 	       "  --long      Enable long mode which is more efficient for long sequences (e.g. long "
 	       "reads, contigs, reference).\n"
-	       "  -r repeat_bf_path  Use a Bloom filter to filter out repetitive minimizers.\n"
-	       "  -s solid_bf_path  Use a Bloom filter to only select solid minimizers.\n"
 	       "  -o FILE     Write output to FILE, default is stdout.\n"
 	       "  -t T        Use T number of threads (default 5, max 5) per input file.\n"
 	       "  -v          Show verbose output.\n"
@@ -72,7 +73,7 @@ main(int argc, char* argv[])
 	int optindex = 0;
 	int help = 0, version = 0;
 	bool verbose = false;
-	unsigned k = 0, w = 0, t = 5;
+	unsigned k = 0, w = 0, t = 5, min_mx = 0, max_mx = std::numeric_limits<unsigned>::max();
 	bool w_set = false;
 	bool k_set = false;
 	int with_id = 0, with_bx = 0, with_pos = 0, with_strand = 0, with_seq = 0;
@@ -91,7 +92,7 @@ main(int argc, char* argv[])
 		                                      { "help", no_argument, &help, 1 },
 		                                      { "version", no_argument, &version, 1 },
 		                                      { nullptr, 0, nullptr, 0 } };
-	while ((c = getopt_long(argc, argv, "k:w:o:t:vr:s:", longopts, &optindex)) != -1) {
+	while ((c = getopt_long(argc, argv, "k:w:a:b:o:t:vr:s:", longopts, &optindex)) != -1) {
 		switch (c) {
 		case 0:
 			break;
@@ -102,6 +103,12 @@ main(int argc, char* argv[])
 		case 'w':
 			w_set = true;
 			w = std::stoul(optarg);
+			break;
+        case 'a':
+			min_mx = std::stoul(optarg);
+			break;
+        case 'b':
+			max_mx = std::stoul(optarg);
 			break;
 		case 'o':
 			outfile = optarg;
@@ -118,30 +125,8 @@ main(int argc, char* argv[])
 			}catch (const std::exception& e) {
 				std::cerr << e.what() << '\n';
 			}
-			
-/* 			with_repeat = true;
-			std::cerr << "Loading repeat Bloom filter from " << optarg << std::endl;
-			try {
-				repeat_bf =
-				    std::unique_ptr<btllib::KmerBloomFilter>(new btllib::KmerBloomFilter(optarg));
-			} catch (const std::exception& e) {
-				std::cerr << e.what() << '\n';
-			}
-			std::cerr << "Finished loading repeat Bloom filter" << std::endl; */
 			break;
 		}
-/* 		case 's': {
-			with_solid = true;
-			std::cerr << "Loading solid Bloom filter from " << optarg << std::endl;
-			try {
-				solid_bf =
-				    std::unique_ptr<btllib::KmerBloomFilter>(new btllib::KmerBloomFilter(optarg));
-			} catch (const std::exception& e) {
-				std::cerr << e.what() << '\n';
-			}
-			std::cerr << "Finished loading solid Bloom filter" << std::endl;
-			break;
-		} */
 		default:
 			std::exit(EXIT_FAILURE);
 		}
@@ -217,6 +202,8 @@ main(int argc, char* argv[])
 			    k,
 			    w,
 				counting_bf->get_counting_bloom_filter(),
+				min_mx,
+				max_mx,
 			    flags,
 			    t,
 			    verbose));
