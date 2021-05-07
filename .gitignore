@@ -1,5 +1,7 @@
+
+src/indexlr
 # Prerequisites
-*.d
+.d
 
 # Compiled Object files
 *.slo
