@@ -2,15 +2,18 @@
 
 Paired Sentinel Sequences Extraction Class for ABySS3-Hackathon on 6th of May.
 
-Draft Class Diagram:
+#Install
+```
+https://github.com/MurathanGoktas/Hackathon-ABySS3.git --recurse-submodules
+cd Hackathon-ABySS3/src
+g++ SentinelBloomFilterConstructor.cpp -o indexlr -I../b/ -std=c++11 -pthread
+```
 
-bf: BloomFilter
-hashes: Array of hashes
-ntHashIt: Custom ntHashIterator
-
-PairedSSGenerator()
-
-combineAndInsert()
-
------
-CustomntHashIterator()
+#Run
+```
+indexlr -k K -w W -r counting_bf_path [-a min_mx] [-b max_mx] [--id] [--bx] [--pos] [--seq]
+```
+*Example:*
+```
+indexlr -k16 -w32 -a8 -b32 -r ./counting_bf.bf  -o sentinels_k16w32a8b32.txt ./celegans_ONT-40x.chr3.fa
+```
