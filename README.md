@@ -12,6 +12,7 @@ g++ SentinelBloomFilterConstructor.cpp -o indexlr -I../b/ -std=c++11 -pthread
 #Run
 ```
 indexlr -k K -w W -r counting_bf_path [-a min_mx] [-b max_mx] [--id] [--bx] [--pos] [--seq]
+kmers with multiplicity > min_mx and < max_mx will be filtered in.
 ```
 *Example:*
 ```
