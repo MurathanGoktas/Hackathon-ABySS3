@@ -77,7 +77,7 @@ main(int argc, char* argv[])
 	bool k_set = false;
 	int with_id = 0, with_bx = 0, with_pos = 0, with_strand = 0, with_seq = 0;
 	//std::unique_ptr<btllib::KmerBloomFilter> repeat_bf, solid_bf;
-	std::unique_ptr<btllib::KmerCountingBloomFilter<uint16_t>> counting_bf;
+	std::unique_ptr<btllib::KmerCountingBloomFilter<uint32_t>> counting_bf;
 	bool with_repeat = false, with_solid = false;
 	int long_mode = 0;
 	std::string outfile("-");
@@ -112,8 +112,14 @@ main(int argc, char* argv[])
 		case 'v':
 			verbose = true;
 			break;
-/* 		case 'r': {
-			with_repeat = true;
+ 		case 'r': {
+			try{
+				counting_bf = std::unique_ptr<btllib::KmerCountingBloomFilter<uint32_t>>(new btllib::KmerCountingBloomFilter<uint32_t>(optarg));
+			}catch (const std::exception& e) {
+				std::cerr << e.what() << '\n';
+			}
+			
+/* 			with_repeat = true;
 			std::cerr << "Loading repeat Bloom filter from " << optarg << std::endl;
 			try {
 				repeat_bf =
@@ -121,10 +127,10 @@ main(int argc, char* argv[])
 			} catch (const std::exception& e) {
 				std::cerr << e.what() << '\n';
 			}
-			std::cerr << "Finished loading repeat Bloom filter" << std::endl;
+			std::cerr << "Finished loading repeat Bloom filter" << std::endl; */
 			break;
 		}
-		case 's': {
+/* 		case 's': {
 			with_solid = true;
 			std::cerr << "Loading solid Bloom filter from " << optarg << std::endl;
 			try {
@@ -140,7 +146,8 @@ main(int argc, char* argv[])
 			std::exit(EXIT_FAILURE);
 		}
 	}
-	counting_bf = std::unique_ptr<btllib::KmerCountingBloomFilter<uint16_t>>(new btllib::KmerCountingBloomFilter<uint16_t>(optarg));
+	//counting_bf = std::unique_ptr<btllib::KmerCountingBloomFilter<uint16_t>>(new btllib::KmerCountingBloomFilter<uint16_t>(optarg));
+	//k = 16;
 	if (t > MAX_THREADS) {
 		t = MAX_THREADS;
 		std::cerr << (PROGNAME + ' ' + VERSION + ": Using more than " +
