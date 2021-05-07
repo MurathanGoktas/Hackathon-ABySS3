@@ -4,7 +4,7 @@ Paired Sentinel Sequences Extraction Class for ABySS3-Hackathon on 6th of May.
 
 #Install
 ```
-https://github.com/MurathanGoktas/Hackathon-ABySS3.git
+https://github.com/MurathanGoktas/Hackathon-ABySS3.git --recurse-submodules
 cd Hackathon-ABySS3/src
 g++ SentinelBloomFilterConstructor.cpp -o indexlr -I../b/ -std=c++11 -pthread
 ```
