@@ -1,5 +1,6 @@
 
 src/indexlr
+tests/
 # Prerequisites
 .d
 
